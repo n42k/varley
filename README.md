@@ -1,4 +1,3 @@
-
 # Varley
 A multiplayer game engine with rapid prototyping as its sole focus.
 Intended to be used for game jams with limited time, such as the 1 hour game jam.
@@ -12,9 +11,11 @@ Afterwards, create 3 files:
 * `client.js` - client code
 * `shared.js` - code shared by both server and client
 
-You may use the example files below to quickly get started with the engine.
+You may use the 3 example files below to quickly get started with the engine.
 
-Then, use `node server.js` to run your game!
+Then, use `node server.js` to run your game.
+
+You can then play it at [http://localhost:8080](http://localhost:8080)!
 
 ## Code Example
 An example of a tron-like game is available:
@@ -60,13 +61,15 @@ const BLOCK_SIZE = SIZE[0] / WORLD_WIDTH
 const PAGE_BG = '#FFFFFF'
 const CANVAS_BG = 'green'
 
-const PRELOAD = [0, 1, 2, 3, 4, 5].map(val => 'rectangle' + val + '.png')
+const colors = ['#FF0000', '#00FF00', '#0000FF',
+                '#FFFF00', '#FF00FF', '#00FFFF']
 
 function update(pub) {
   for(let y = 0; y < WORLD_HEIGHT; ++y)
   for(let x = 0; x < WORLD_WIDTH; ++x) {
     let color = pub.world[x + y * WORLD_WIDTH] % 6
-    draw(x * BLOCK_SIZE, y * BLOCK_SIZE, 'rectangle' + color + '.png')
+    const BS = BLOCK_SIZE
+    drawRect(x * BS, y * BS, BS, BS, colors[color])
   }
 }
 ```

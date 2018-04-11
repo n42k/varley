@@ -17,9 +17,12 @@ function begin() {
   preloadNext()
 }
 
-var preload = PRELOAD
+var preload
+if(typeof PRELOAD !== 'undefined')
+  preload = PRELOAD
+
 function preloadNext() {
-  if(preload.length === 0) {
+  if(preload === undefined || preload.length === 0) {
     init()
     return
   }
@@ -50,6 +53,14 @@ function draw(x, y, image) {
     return
 
   ctx.drawImage(img, x, y)
+}
+
+function drawRect(x, y, width, height, color) {
+  if(color === undefined)
+    return
+
+  ctx.fillStyle = color
+  ctx.fillRect(x, y, width, height)
 }
 
 var keys = {
