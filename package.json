@@ -1,0 +1,20 @@
+{
+  "name": "varley",
+  "version": "0.0.1",
+  "description": "A multiplayer game engine with rapid prototyping as its sole focus. Intended to be used for game jams with limited time, such as the 1 hour game jam.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/n42k/varley.git"
+  },
+  "author": "n42k",
+  "license": "MIT",
+  "author": "Pedro Amaro <n101010k@gmail.com> (https://github.com/n42k)",
+  "bugs": {
+    "url": "https://github.com/n42k/varley/issues"
+  },
+  "homepage": "https://github.com/n42k/varley#readme"
+}
