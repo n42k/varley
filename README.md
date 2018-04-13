@@ -24,13 +24,12 @@ server.js:
 ```
 const varley = require('varley')(this);
 
-varley.pub('world', Array(WORLD_WIDTH * WORLD_HEIGHT).fill(-1))
+varley.pub.world = Array(WORLD_WIDTH * WORLD_HEIGHT).fill(-1)
 
 varley.on('connect', player => {
   player.vx = 1, player.vy = 0
   player.x = Math.floor(Math.random() * WORLD_WIDTH)
   player.y = Math.floor(Math.random() * WORLD_HEIGHT)
-  varley.pub('world')[player.x + player.y * WORLD_WIDTH] = player.id
 })
 
 let keys = {'UP': [0, -1], 'LEFT': [-1, 0], 'RIGHT': [1, 0], 'DOWN': [0, 1]}
@@ -41,14 +40,14 @@ varley.on('playertick', player => {
 
   if(player.x < 0 || player.y < 0 ||
      player.x >= WORLD_WIDTH || player.y >= WORLD_HEIGHT ||
-     varley.pub('world')[player.x + player.y * WORLD_WIDTH] !== -1)
+     varley.pub.world[player.x + player.y * WORLD_WIDTH] !== -1)
     return player.disconnect()
 
-  varley.pub('world')[player.x + player.y * WORLD_WIDTH] = player.id
+  varley.pub.world[player.x + player.y * WORLD_WIDTH] = player.id
 })
 
 varley.on('disconnect', player =>
-  varley.pub('world', varley.pub('world').map(t => t == player.id ? -1 : t)))
+  varley.pub.world = varley.pub.world.map(t => t == player.id ? -1 : t))
 
 varley.run(8080, 10)
 ```
@@ -64,7 +63,7 @@ const CANVAS_BG = 'green'
 const colors = ['#FF0000', '#00FF00', '#0000FF',
                 '#FFFF00', '#FF00FF', '#00FFFF']
 
-function update(pub) {
+function update() {
   for(let y = 0; y < WORLD_HEIGHT; ++y)
   for(let x = 0; x < WORLD_WIDTH; ++x) {
     let color = pub.world[x + y * WORLD_WIDTH] % 6

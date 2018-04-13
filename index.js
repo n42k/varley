@@ -18,24 +18,19 @@ const wss = new WebSocket.Server({ server })
 
 const Player = require('./player')
 
-var nextId = 0;
-var shared = {}
 var players = []
 
 module.exports = self => {
-	const path = 'shared.js'
-	var code = fs.readFileSync(path)
-	vm.runInThisContext.bind(self)(code, path)
+	const serverPath = __dirname + '/server.js'
+	let serverCode = fs.readFileSync(serverPath)
+	vm.runInThisContext.bind(self)(serverCode, serverPath)
+	const sharedPath = 'shared.js'
+	let sharedCode = fs.readFileSync(sharedPath)
+	vm.runInThisContext.bind(self)(sharedCode, sharedPath)
 	return this
 }
 
-// Sets a shared variable named *name* within the group *group* to value
-exports.pub = (name, value) => {
-	if(value === undefined)
-		return shared[name]
-
-	shared[name] = value
-}
+exports.pub = {}
 
 var callbacks = {
 	'connect': [],
@@ -55,19 +50,25 @@ exports.on = (name, callback) => {
 
 exports.run = (port, tickRate) => {
 	setInterval(() => {
-		for(let callback in callbacks['tick'])
-			callbacks['tick'][callback]()
-		for(let callback in callbacks['playertick'])
-		for(let player in players) {
-			callbacks['playertick'][callback](players[player])
-		}
+		callbacks['tick'].forEach(callback => callback())
 
-		let toSend = JSON.stringify({state: shared})
-		for(let player in players) {
-			let ws = players[player].ws
-			if (ws.readyState === ws.OPEN)
-				ws.send(toSend)
-		}
+		players.forEach(player => {
+			if(player.tick)
+				player.tick()
+		})
+
+		callbacks['playertick'].forEach(callback => {
+			players.forEach(player => callback(player))
+		})
+
+		players.sort((a, b) => a.y - b.y)
+
+		let toSend = JSON.stringify({pub: exports.pub, players: players})
+		players.forEach(player => {
+				let ws = player.ws
+				if (ws.readyState === ws.OPEN)
+					ws.send(JSON.stringify({player: player, all: toSend}))
+		})
 		}, 1000/tickRate)
 	server.listen(port, () => console.log('Varley running on port ' + port + '!'))
 }
@@ -78,22 +79,28 @@ wss.on('connection', ws => {
 
 	console.log('Player ' + player.id + ' has connected!')
 
-	for(let callback in callbacks['connect'])
-		callbacks['connect'][callback](player)
+	callbacks['connect'].forEach(callback => callback(player))
 
 	ws.on('message', msg => {
 		let json = JSON.parse(msg)
-		if(json.press)
-			for(let callback in callbacks['press'])
-				callbacks['press'][callback](player, json.press)
+
+		if(json.press) {
+			player.keys[json.press] = true
+			callbacks['press'].forEach(callback => callback(player, json.press))
+		}
+
+		if(json.release) {
+			player.keys[json.release] = false
+			callbacks['press'].forEach(callback => callback(player, json.release))
+		}
 	})
 
 	ws.on('close', () => {
 		let index = players.indexOf(player)
-		if(index > -1)
+		if(index > -1) {
 			players.splice(index, 1)
-			for(let callback in callbacks['disconnect'])
-				callbacks['disconnect'][callback](player)
+			callbacks['disconnect'].forEach(callback => callback(player))
+		}
 
 		console.log('Player ' + player.id + ' has disconnected!')
 	})

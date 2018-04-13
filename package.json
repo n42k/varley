@@ -1,10 +1,11 @@
 {
   "name": "varley",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "A multiplayer game engine with rapid prototyping as its sole focus. Intended to be used for game jams with limited time, such as the 1 hour game jam.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepare": "require-self"
   },
   "repository": {
     "type": "git",
@@ -20,5 +21,8 @@
     "connect-static-file": "^2.0.0",
     "express": "^4.16.3",
     "ws": "^5.1.1"
+  },
+  "devDependencies": {
+    "require-self": "^0.2.1"
   }
 }
