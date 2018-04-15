@@ -74,6 +74,6 @@ _SpriteSheet.prototype.drawAA = function(array, x, y) {
   ctx.restore()
 }
 
-function Sheet(image, columns, rows) {
-  return new _SpriteSheet(image, rows, columns)
+function Sheet(image, width, height) {
+  return new _SpriteSheet(image, width, height)
 }

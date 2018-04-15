@@ -23,6 +23,7 @@ var oldPlayers = []
 var players = []
 
 module.exports = self => {
+	global.sizeOf = require('image-size')
 	const serverPath = __dirname + '/server.js'
 	let serverCode = fs.readFileSync(serverPath)
 	vm.runInThisContext.bind(self)(serverCode, serverPath)
@@ -38,6 +39,7 @@ exports.pub = {}
 var callbacks = {
 	'connect': [],
 	'press': [],
+	'release': [],
 	'playertick': [],
 	'tick': [],
 	'disconnect': []
@@ -49,6 +51,27 @@ exports.on = (name, callback) => {
 	} catch(_) {
 		throw new Error('Invalid varley.on(): varley.on(\'' + name + '\', ...)')
 	}
+}
+
+function update() {
+	players.sort((a, b) => a.y - b.y)
+
+	let newPub = JSON.parse(JSON.stringify(exports.pub))
+	let newPlayers = JSON.parse(JSON.stringify(players))
+
+	let toSend = JSON.stringify({
+		pubDiff: jsondiffpatch.diff(oldPub, newPub),
+		playersDiff: jsondiffpatch.diff(oldPlayers, newPlayers)
+	})
+
+	players.forEach(player => {
+			let ws = player.ws
+			if (ws.readyState === ws.OPEN)
+				ws.send(JSON.stringify({player: player, all: toSend}))
+	})
+
+	oldPub = newPub
+	oldPlayers = newPlayers
 }
 
 exports.run = (port, tickRate) => {
@@ -64,24 +87,7 @@ exports.run = (port, tickRate) => {
 			players.forEach(player => callback(player))
 		})
 
-		players.sort((a, b) => a.y - b.y)
-
-		let newPub = JSON.parse(JSON.stringify(exports.pub))
-		let newPlayers = JSON.parse(JSON.stringify(players))
-
-		let toSend = JSON.stringify({
-			pubDiff: jsondiffpatch.diff(oldPub, newPub),
-			playersDiff: jsondiffpatch.diff(oldPlayers, newPlayers)
-		})
-
-		players.forEach(player => {
-				let ws = player.ws
-				if (ws.readyState === ws.OPEN)
-					ws.send(JSON.stringify({player: player, all: toSend}))
-		})
-
-		oldPub = newPub
-		oldPlayers = newPlayers
+		update()
 		}, 1000/tickRate)
 	server.listen(port, () => console.log('Varley running on port ' + port + '!'))
 }
@@ -96,6 +102,7 @@ wss.on('connection', ws => {
 	players.push(player)
 
 	callbacks['connect'].forEach(callback => callback(player))
+	update()
 
 	ws.on('message', msg => {
 		let json = JSON.parse(msg)
@@ -107,7 +114,7 @@ wss.on('connection', ws => {
 
 		if(json.release) {
 			player.keys[json.release] = false
-			callbacks['press'].forEach(callback => callback(player, json.release))
+			callbacks['release'].forEach(callback => callback(player, json.release))
 		}
 	})
 
@@ -119,5 +126,6 @@ wss.on('connection', ws => {
 		}
 
 		console.log('Player ' + player.id + ' has disconnected!')
+		update()
 	})
 })
