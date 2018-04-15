@@ -31,4 +31,9 @@ varley.on('connect', player => {
   })
 })
 
+varley.on('press', (player, key) => {
+  if(key === 'SPACE')
+    varley.pub.world[Math.round(player.y/32)][Math.round(player.x/32)] = 2
+})
+
 varley.run(8080, 16)

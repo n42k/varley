@@ -28,8 +28,17 @@ function _begin() {
       ctx.save()
 
       let all = JSON.parse(json.all)
-      pub = all.pub
-      players = all.players
+
+      if(all.pub)
+        pub = all.pub
+      else if(all.pubDiff)
+        pub = jsondiffpatch.patch(pub, all.pubDiff)
+
+      if(all.players)
+        players = all.players
+      else if(all.playersDiff)
+        players = jsondiffpatch.patch(players, all.playersDiff)
+
       player = json.player
       update()
       ctx.restore()
@@ -62,6 +71,7 @@ function drawRect(x, y, width, height, color) {
 }
 
 var keys = {
+  32: 'SPACE',
   37: 'LEFT',
   38: 'UP',
   39: 'RIGHT',

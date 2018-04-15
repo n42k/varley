@@ -3,10 +3,11 @@
 const fs = require('fs')
 const vm = require('vm')
 
+const jsondiffpatch = require('jsondiffpatch').create();
+
 const express = require('express')
 const app = express()
 const staticFile = require('connect-static-file')
-
 app.use('/client.js', staticFile('client.js'))
 app.use('/shared.js', staticFile('shared.js'))
 app.use(express.static(__dirname + '/static'))
@@ -18,6 +19,7 @@ const wss = new WebSocket.Server({ server })
 
 const Player = require('./player')
 
+var oldPlayers = []
 var players = []
 
 module.exports = self => {
@@ -30,6 +32,7 @@ module.exports = self => {
 	return this
 }
 
+var oldPub = {}
 exports.pub = {}
 
 var callbacks = {
@@ -63,21 +66,34 @@ exports.run = (port, tickRate) => {
 
 		players.sort((a, b) => a.y - b.y)
 
-		let toSend = JSON.stringify({pub: exports.pub, players: players})
+		let newPub = JSON.parse(JSON.stringify(exports.pub))
+		let newPlayers = JSON.parse(JSON.stringify(players))
+
+		let toSend = JSON.stringify({
+			pubDiff: jsondiffpatch.diff(oldPub, newPub),
+			playersDiff: jsondiffpatch.diff(oldPlayers, newPlayers)
+		})
+
 		players.forEach(player => {
 				let ws = player.ws
 				if (ws.readyState === ws.OPEN)
 					ws.send(JSON.stringify({player: player, all: toSend}))
 		})
+
+		oldPub = newPub
+		oldPlayers = newPlayers
 		}, 1000/tickRate)
 	server.listen(port, () => console.log('Varley running on port ' + port + '!'))
 }
 
 wss.on('connection', ws => {
 	let player = new Player(ws)
-	players.push(player)
-
 	console.log('Player ' + player.id + ' has connected!')
+
+	let toSend = JSON.stringify({pub: exports.pub, players: players})
+	ws.send(JSON.stringify({player: player, all: toSend}))
+
+	players.push(player)
 
 	callbacks['connect'].forEach(callback => callback(player))
 
