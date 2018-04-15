@@ -1,5 +1,3 @@
-const BLOCK_SIZE = 32
-
 // https://opengameart.org/content/green-cap-character-16x18
 const farmer = Sheet('farmer.png', 16, 18)
 

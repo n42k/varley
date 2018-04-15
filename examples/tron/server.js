@@ -1,6 +1,8 @@
 const varley = require('varley')(this);
 
-varley.pub.world = Array(WORLD_WIDTH * WORLD_HEIGHT).fill(-1)
+varley.on('start', () => {
+  varley.pub.world = Array(WORLD_WIDTH * WORLD_HEIGHT).fill(-1)
+})
 
 varley.on('connect', player => {
   player.vx = 1, player.vy = 0
@@ -25,4 +27,4 @@ varley.on('playertick', player => {
 varley.on('disconnect', player =>
   varley.pub.world = varley.pub.world.map(t => t == player.id ? -1 : t))
 
-varley.run(8080, 10)
+varley.run({matchmaking: [2, 6, 2, 5]})

@@ -3,8 +3,6 @@
 const fs = require('fs')
 const vm = require('vm')
 
-const jsondiffpatch = require('jsondiffpatch').create();
-
 const express = require('express')
 const app = express()
 const staticFile = require('connect-static-file')
@@ -17,10 +15,10 @@ const WebSocket = require('ws')
 const server = require('http').createServer(app)
 const wss = new WebSocket.Server({ server })
 
-const Player = require('./player')
-
+const Game = require('./game')
+const Lobby = require('./lobby')
 var oldPlayers = []
-var players = []
+exports.players = []
 
 module.exports = self => {
 	global.sizeOf = require('image-size')
@@ -33,10 +31,10 @@ module.exports = self => {
 	return this
 }
 
-var oldPub = {}
 exports.pub = {}
 
 var callbacks = {
+	'start': [],
 	'connect': [],
 	'press': [],
 	'release': [],
@@ -53,79 +51,52 @@ exports.on = (name, callback) => {
 	}
 }
 
-function update() {
-	players.sort((a, b) => a.y - b.y)
+var game
+var tickRate
 
-	let newPub = JSON.parse(JSON.stringify(exports.pub))
-	let newPlayers = JSON.parse(JSON.stringify(players))
+function tick() {
+	let start = Date.now()
 
-	let toSend = JSON.stringify({
-		pubDiff: jsondiffpatch.diff(oldPub, newPub),
-		playersDiff: jsondiffpatch.diff(oldPlayers, newPlayers)
-	})
+	game.tick()
 
-	players.forEach(player => {
-			let ws = player.ws
-			if (ws.readyState === ws.OPEN)
-				ws.send(JSON.stringify({player: player, all: toSend}))
-	})
-
-	oldPub = newPub
-	oldPlayers = newPlayers
+	let end = Date.now()
+	let dt = (1000/tickRate) - (end - start)
+	setTimeout(tick, dt)
 }
 
-exports.run = (port, tickRate) => {
-	setInterval(() => {
-		callbacks['tick'].forEach(callback => callback())
+exports.run = (args) => {
+	if(args === undefined)
+		args = {}
 
-		players.forEach(player => {
-			if(player.tick)
-				player.tick()
+	tickRate = args.tickRate
+	if(tickRate === undefined)
+		tickRate = 10
+
+	let port = args.port
+	if(port === undefined)
+		port = 8080
+
+	if(args.matchmaking === undefined) {
+		game = new Game(exports, callbacks)
+		game.single = true
+		game.start()
+	} else {
+		let [minPlayers, maxPlayers, minTime, maxTime] = args.matchmaking
+		game = new Lobby(minPlayers, maxPlayers, minTime, maxTime, () => {
+			return new Game(exports, callbacks)
 		})
+	}
 
-		callbacks['playertick'].forEach(callback => {
-			players.forEach(player => callback(player))
-		})
+	tick()
 
-		update()
-		}, 1000/tickRate)
 	server.listen(port, () => console.log('Varley running on port ' + port + '!'))
 }
 
+var nextWS = 0
 wss.on('connection', ws => {
-	let player = new Player(ws)
-	console.log('Player ' + player.id + ' has connected!')
+	ws.id = nextWS++
+	game.connect(ws)
+	ws.on('message', msg => game.message(ws, msg))
 
-	let toSend = JSON.stringify({pub: exports.pub, players: players})
-	ws.send(JSON.stringify({player: player, all: toSend}))
-
-	players.push(player)
-
-	callbacks['connect'].forEach(callback => callback(player))
-	update()
-
-	ws.on('message', msg => {
-		let json = JSON.parse(msg)
-
-		if(json.press) {
-			player.keys[json.press] = true
-			callbacks['press'].forEach(callback => callback(player, json.press))
-		}
-
-		if(json.release) {
-			player.keys[json.release] = false
-			callbacks['release'].forEach(callback => callback(player, json.release))
-		}
-	})
-
-	ws.on('close', () => {
-		let index = players.indexOf(player)
-		if(index > -1) {
-			players.splice(index, 1)
-			callbacks['disconnect'].forEach(callback => callback(player))
-		}
-
-		console.log('Player ' + player.id + ' has disconnected!')
-		update()
-	})
+	ws.on('close', () => game.disconnect(ws))
 })

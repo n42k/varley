@@ -18,12 +18,32 @@ function _begin() {
   canvas.height = height
   canvas.style.backgroundColor = CANVAS_BG || 'black'
 
-  ws = new WebSocket(document.URL.replace('http://', 'ws://').replace('https://', 'wss://'))
+  ws = new WebSocket(document.URL
+    .replace('http://', 'ws://')
+    .replace('https://', 'wss://'))
 
   ws.onmessage = function(msg) {
     let json = JSON.parse(msg.data)
 
-    if(json.all && json.player) {
+    if(json.lobby) {
+      let lobby = json.lobby
+
+      ctx.fillStyle = '#ccc'
+      ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+      ctx.fillStyle = '#000'
+      ctx.font = '20px Arial'
+      ctx.fillText(
+        'You are in position ' + lobby.position + ' in the queue.', 10, 30)
+      ctx.fillText(
+        'There are ' + lobby.playersInQueue + ' players in the queue.', 10, 50)
+      ctx.fillText(
+        'There are ' + lobby.players +
+        ' players playing in ' + lobby.games + ' games.', 10, 70)
+      ctx.fillText(
+        'Time left to start game: ' + lobby.timeRemaining, 10, 90)
+
+    } else if(json.all && json.player) {
       canvas.width = canvas.width // clear canvas
       ctx.save()
 
@@ -44,6 +64,8 @@ function _begin() {
       ctx.restore()
     }
   }
+
+  ws.onclose = _begin
 }
 
 function drawImage(x, y, image) {

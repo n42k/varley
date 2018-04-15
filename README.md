@@ -4,7 +4,7 @@ Intended to be used for game jams with limited time, such as the 1 hour game jam
 
 ## Quick Start
 
-To start a new Varley project, simply create a new directory, then run `npm install varley --save` inside of it.
+To start a new Varley project, simply create a new directory, then run `npm init` and `npm install varley --save` inside of it.
 
 Afterwards, create 3 files:
 * `server.js` - server code, where the first line is `const varley = require('varley')(this)`
@@ -18,13 +18,16 @@ Then, use `node server.js` to run your game.
 You can then play it at [http://localhost:8080](http://localhost:8080)!
 
 ## Code Example
-An example of a tron-like game is available:
+An example of a tron-like game is available below.
+Note that it already includes a matchmaking system, only starting matches if there are between 2 to 6 players.
 
 server.js:
 ```
 const varley = require('varley')(this);
 
-varley.pub.world = Array(WORLD_WIDTH * WORLD_HEIGHT).fill(-1)
+varley.on('start', () => {
+  varley.pub.world = Array(WORLD_WIDTH * WORLD_HEIGHT).fill(-1)
+})
 
 varley.on('connect', player => {
   player.vx = 1, player.vy = 0
@@ -49,7 +52,7 @@ varley.on('playertick', player => {
 varley.on('disconnect', player =>
   varley.pub.world = varley.pub.world.map(t => t == player.id ? -1 : t))
 
-varley.run(8080, 10)
+varley.run({matchmaking: [2, 6, 2, 5]})
 ```
 
 client.js:
