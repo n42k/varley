@@ -1,11 +1,6 @@
 'use strict'
 
-const jsondiffpatch = require('jsondiffpatch').create({
-  arrays: {
-    detectMove: true,
-    includeValueOnMove: false
-  }
-})
+const sloppydiff = require('sloppydiff')
 
 const Player = require('./player')
 
@@ -113,8 +108,8 @@ const Game = class Game {
   	let newPub = JSON.parse(JSON.stringify(this.pub))
   	let newPlayers = JSON.parse(JSON.stringify(this.players))
 
-    let pubDiff = jsondiffpatch.diff(this.oldPub, newPub)
-    let playersDiff = jsondiffpatch.diff(this.oldPlayers, newPlayers)
+    let pubDiff = sloppydiff.diff(this.oldPub, newPub)
+    let playersDiff = sloppydiff.diff(this.oldPlayers, newPlayers)
 
   	let toSend = JSON.stringify({
   		pubDiff: pubDiff,

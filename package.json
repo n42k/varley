@@ -1,6 +1,6 @@
 {
   "name": "varley",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "A multiplayer game engine with rapid prototyping as its sole focus. Intended to be used for game jams with limited time, such as the 1 hour game jam.",
   "main": "index.js",
   "scripts": {
@@ -22,6 +22,7 @@
     "express": "^4.16.3",
     "image-size": "^0.6.2",
     "jsondiffpatch": "^0.3.9",
+    "sloppydiff": "0.0.2",
     "ws": "^5.1.1"
   },
   "devDependencies": {
