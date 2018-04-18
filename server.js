@@ -1,3 +1,6 @@
+let A = 0
+let S = 1
+
 function _Sheet(image, width, height) {
   this.width = width
   this.height = height

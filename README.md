@@ -2,23 +2,35 @@
 A multiplayer game engine with rapid prototyping as its sole focus.
 Intended to be used for game jams with limited time, such as the 1 hour game jam.
 
+## Features
+* Multiplayer
+* Top down movement, including collisions
+* Animations, sprite sheets
+* Matchmaking, lobby: you can start games with a minimum and maximum number of players, and there can be multiple games running at the same time
+* Game state diffing: only the data that has been modified is sent every network tick, not the entire game state
+
+## Examples
+Try playing with a friend!
+
+* Tron-like game: [http://n42k.ddns.net:8892](http://n42k.ddns.net:8892)
+* Farm game: [http://n42k.ddns.net:8891](http://n42k.ddns.net:8891)
+
+The source code of these 2 games is available in the examples folder
+
+## Documentation
+There's a [wiki](https://github.com/n42k/varley/wiki) available.
+
 ## Quick Start
+To start a new Varley project, simply create a new directory, then run `npm init -f` and `npm install varley --save` inside of it.
 
-To start a new Varley project, simply create a new directory, then run `npm init` and `npm install varley --save` inside of it.
-
-Afterwards, create 3 files:
-* `server.js` - server code, where the first line is `const varley = require('varley')(this)`
-* `client.js` - client code
-* `shared.js` - code shared by both server and client
-
-You may use the 3 example files below to quickly get started with the engine.
+Afterwards, pick an example from above, and copy the files from the examples folder of this repository.
 
 Then, use `node server.js` to run your game.
 
 You can then play it at [http://localhost:8080](http://localhost:8080)!
 
 ## Code Example
-An example of a tron-like game is available below.
+To see how short games can be, an example of a tron-like game is available below.
 Note that it already includes a matchmaking system, only starting matches if there are between 2 to 6 players.
 
 server.js:
@@ -80,3 +92,11 @@ shared.js:
 ```
 const WORLD_WIDTH = 50, WORLD_HEIGHT = 35
 ```
+
+## Contributing
+The best way to contribute at this point is to try out the engine, and e-mail (n101010k@gmail.com) me your thoughts on it, or create an [issue](https://github.com/n42k/varley/issues/new) if you find a problem with it. Pull requests are also welcome, if you fix the problem you've found.
+
+If you have a feature request, feel free to open an issue, so that we can discuss it.
+
+## License
+MIT
