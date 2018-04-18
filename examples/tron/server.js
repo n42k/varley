@@ -27,4 +27,4 @@ varley.on('playertick', player => {
 varley.on('disconnect', player =>
   varley.pub.world = varley.pub.world.map(t => t == player.id ? -1 : t))
 
-varley.run({matchmaking: [2, 6, 2, 5]})
+varley.run()

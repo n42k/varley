@@ -1,21 +1,25 @@
 # Varley
+
+[![npm version](https://badge.fury.io/js/varley.svg)](https://badge.fury.io/js/varley)
+
 A multiplayer game engine with rapid prototyping as its sole focus.
 Intended to be used for game jams with limited time, such as the 1 hour game jam.
 
 ## Features
-* Multiplayer
-* Top down movement, including collisions
-* Animations, sprite sheets
-* Matchmaking, lobby: you can start games with a minimum and maximum number of players, and there can be multiple games running at the same time
-* Game state diffing: only the data that has been modified is sent every network tick, not the entire game state
+* Multiplayer.
+* Top down and platformer movement, including collisions.
+* Animations, sprite sheets.
+* Matchmaking, lobby: you can start games with a minimum and maximum number of players, and there can be multiple games running at the same time.
+* Game state diffing: only the data that has been modified is sent every network tick, not the entire game state.
 
 ## Examples
 Try playing with a friend!
 
-* Tron-like game: [http://n42k.ddns.net:8892](http://n42k.ddns.net:8892)
-* Farm game: [http://n42k.ddns.net:8891](http://n42k.ddns.net:8891)
+* [Tron-like game](http://n42k.ddns.net:8892)
+* [Farm game](http://n42k.ddns.net:8891)
+* [Platformer game](http://n42k.ddns.net:8893)
 
-The source code of these 2 games is available in the examples folder
+The source code of these 3 games is available in the examples folder.
 
 ## Documentation
 There's a [wiki](https://github.com/n42k/varley/wiki) available.
@@ -31,7 +35,6 @@ You can then play it at [http://localhost:8080](http://localhost:8080)!
 
 ## Code Example
 To see how short games can be, an example of a tron-like game is available below.
-Note that it already includes a matchmaking system, only starting matches if there are between 2 to 6 players.
 
 server.js:
 ```
@@ -64,7 +67,7 @@ varley.on('playertick', player => {
 varley.on('disconnect', player =>
   varley.pub.world = varley.pub.world.map(t => t == player.id ? -1 : t))
 
-varley.run({matchmaking: [2, 6, 2, 5]})
+varley.run()
 ```
 
 client.js:

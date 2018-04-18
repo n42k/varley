@@ -27,9 +27,9 @@ varley.on('start', () => {
 })
 
 varley.on('connect', player => {
-  player.TopDownPlayer(farmer, {
-    x: 384, y: 384, frameTime: 2,
-    animations: [2, 1, 3, 0],
+  player.PlatformerPlayer(farmer, {
+    x: 384, y: 384, vx: 8, vy: 18, ax: 2, ay: 18,
+    frameTime: 2, animations: [3, 2, 3, 2],
     world: varley.pub.world, tileSheet: farm,
     blocks: [
       S, S, S, A, S, A, A, A, A,
