@@ -113,3 +113,27 @@ document.onkeyup = function(e) {
 function camera(x, y) {
   ctx.translate(Math.round(-x + SIZE[0]/2), Math.round(-y + SIZE[1]/2))
 }
+
+function gui(x, y) {
+  ctx.restore()
+  ctx.save()
+}
+
+function drawText(string, x, y, color, textAlignment, font) {
+  if(font === undefined)
+    ctx.font = '20px Arial'
+  else
+    ctx.font = font
+
+  if(textAlignment === undefined)
+    ctx.textAlign = 'left'
+  else
+    ctx.textAlign = textAlignment
+
+  if(color === undefined)
+    ctx.fillStyle = 'white'
+  else
+    ctx.fillStyle = color
+
+  ctx.fillText(string, x, y)
+}
