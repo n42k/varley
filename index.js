@@ -9,6 +9,7 @@ const staticFile = require('connect-static-file')
 app.use('/client.js', staticFile('client.js'))
 app.use('/shared.js', staticFile('shared.js'))
 app.use(express.static(__dirname + '/static'))
+app.use(express.static(__dirname + '/modules'))
 app.use(express.static('resources'))
 
 const WebSocket = require('ws')
@@ -22,12 +23,21 @@ exports.players = []
 
 module.exports = self => {
 	global.sizeOf = require('image-size')
+
+	// server.js
 	const serverPath = __dirname + '/server.js'
 	let serverCode = fs.readFileSync(serverPath)
 	vm.runInThisContext.bind(self)(serverCode, serverPath)
+
+	// shared.js
 	const sharedPath = 'shared.js'
 	let sharedCode = fs.readFileSync(sharedPath)
 	vm.runInThisContext.bind(self)(sharedCode, sharedPath)
+
+	// eshared.js (Engine Shared)
+	const esharedPath = __dirname + '/static/eshared.js'
+	let esharedCode = fs.readFileSync(esharedPath)
+	vm.runInThisContext.bind(self)(esharedCode, esharedPath)
 	return this
 }
 
@@ -90,6 +100,15 @@ exports.run = (args) => {
 	tick()
 
 	server.listen(port, () => console.log('Varley running on port ' + port + '!'))
+}
+
+exports.module = (name, args) => {
+	if(['chat'].indexOf(name) === -1)
+		throw new Error('Invalid module: ' + name)
+
+	callbacks[name] = []
+
+	require('./modules/' + name)(exports, args)
 }
 
 var nextWS = 0

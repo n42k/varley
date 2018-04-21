@@ -4,7 +4,64 @@ var canvas, ctx
 var files = {}
 var ws
 
-var pub, player, players
+var pub, player, players, t
+
+function _update() {
+    canvas.width = canvas.width // clear canvas
+
+    for(let func of _beforeUpdate)
+      func()
+
+    ctx.save()
+    update()
+    ctx.restore()
+
+    for(let func of _afterUpdate)
+      func()
+}
+
+function _onmessage(json) {
+  if(json.lobby) {
+    let lobby = json.lobby
+
+    ctx.fillStyle = '#ccc'
+    ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+    ctx.fillStyle = '#000'
+    ctx.font = '20px Arial'
+    ctx.fillText(
+      'You are in position ' + lobby.position + ' in the queue.', 10, 30)
+    ctx.fillText(
+      'There are ' + lobby.playersInQueue + ' players in the queue.', 10, 50)
+    ctx.fillText(
+      'There are ' + lobby.players +
+      ' players playing in ' + lobby.games + ' games.', 10, 70)
+    ctx.fillText(
+      'Time left to start game: ' + lobby.timeRemaining, 10, 90)
+
+    return
+  }
+
+  if(json.all && json.player) {
+    let all = JSON.parse(json.all)
+
+    if(all.t)
+      t = all.t
+    else
+      throw new Error('No t in json!')
+
+    player = json.player
+
+    if(all.pub && all.players) {
+      pub = all.pub
+      players = all.players
+    } else if(all.pubDiff) {
+      pub = jsondiffpatch.patch(pub, all.pubDiff)
+      players = jsondiffpatch.patch(players, all.playersDiff)
+      _update()
+    }
+  }
+}
 
 function _begin() {
   document.body.style.backgroundColor = PAGE_BG || 'black'
@@ -24,45 +81,7 @@ function _begin() {
 
   ws.onmessage = function(msg) {
     let json = JSON.parse(msg.data)
-
-    if(json.lobby) {
-      let lobby = json.lobby
-
-      ctx.fillStyle = '#ccc'
-      ctx.fillRect(0, 0, canvas.width, canvas.height)
-
-      ctx.fillStyle = '#000'
-      ctx.font = '20px Arial'
-      ctx.fillText(
-        'You are in position ' + lobby.position + ' in the queue.', 10, 30)
-      ctx.fillText(
-        'There are ' + lobby.playersInQueue + ' players in the queue.', 10, 50)
-      ctx.fillText(
-        'There are ' + lobby.players +
-        ' players playing in ' + lobby.games + ' games.', 10, 70)
-      ctx.fillText(
-        'Time left to start game: ' + lobby.timeRemaining, 10, 90)
-
-    } else if(json.all && json.player) {
-      canvas.width = canvas.width // clear canvas
-      ctx.save()
-
-      let all = JSON.parse(json.all)
-
-      if(all.pub)
-        pub = all.pub
-      else if(all.pubDiff)
-        pub = jsondiffpatch.patch(pub, all.pubDiff)
-
-      if(all.players)
-        players = all.players
-      else if(all.playersDiff)
-        players = jsondiffpatch.patch(players, all.playersDiff)
-
-      player = json.player
-      update()
-      ctx.restore()
-    }
+    _onmessage(json)
   }
 
   ws.onclose = _begin
@@ -92,22 +111,36 @@ function drawRect(x, y, width, height, color) {
   ctx.fillRect(Math.round(x), Math.round(y), Math.round(width), Math.round(height))
 }
 
-var keys = {
-  32: 'SPACE',
-  37: 'LEFT',
-  38: 'UP',
-  39: 'RIGHT',
-  40: 'DOWN',
+let keyChanges = {
+  ArrowLeft: 'LEFT',
+  ArrowUp: 'UP',
+  ArrowRight: 'RIGHT',
+  ArrowDown: 'DOWN',
+  ' ': 'SPACE'
 }
 
 document.onkeydown = function(e) {
-    e = e || window.event;
-    ws.send(JSON.stringify({press: keys[e.keyCode]}))
+    e = e || window.event
+
+    let key = e.key
+    if(keyChanges[e.key] !== undefined)
+      key = keyChanges[e.key]
+    else if(e.key.length > 1)
+      key = e.key.toUpperCase()
+
+    ws.send(JSON.stringify({press: key}))
 }
 
 document.onkeyup = function(e) {
     e = e || window.event;
-    ws.send(JSON.stringify({release: keys[e.keyCode]}))
+
+    let key = e.key
+    if(keyChanges[e.key] !== undefined)
+      key = keyChanges[e.key]
+    else if(e.key.length > 1)
+      key = e.key.toUpperCase()
+
+    ws.send(JSON.stringify({release: key}))
 }
 
 function camera(x, y) {

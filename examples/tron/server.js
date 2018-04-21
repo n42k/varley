@@ -11,7 +11,8 @@ varley.on('connect', player => {
 })
 
 let keys = {'UP': [0, -1], 'LEFT': [-1, 0], 'RIGHT': [1, 0], 'DOWN': [0, 1]}
-varley.on('press', (player, key) => [player.vx, player.vy] = keys[key])
+varley.on('press', (player, key) =>
+  [player.vx, player.vy] = keys[key] || [player.vx, player.vy])
 
 varley.on('playertick', player => {
   player.x = player.x + player.vx, player.y = player.y + player.vy

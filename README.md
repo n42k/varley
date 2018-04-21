@@ -11,6 +11,7 @@ Intended to be used for game jams with limited time, such as the 1 hour game jam
 * Animations, sprite sheets.
 * Matchmaking, lobby: you can start games with a minimum and maximum number of players, and there can be multiple games running at the same time.
 * Game state diffing: only the data that has been modified is sent every network tick, not the entire game state.
+* Chat module available.
 
 ## Examples
 Try playing with a friend!
@@ -51,7 +52,8 @@ varley.on('connect', player => {
 })
 
 let keys = {'UP': [0, -1], 'LEFT': [-1, 0], 'RIGHT': [1, 0], 'DOWN': [0, 1]}
-varley.on('press', (player, key) => [player.vx, player.vy] = keys[key])
+varley.on('press', (player, key) =>
+  [player.vx, player.vy] = keys[key] || [player.vx, player.vy])
 
 varley.on('playertick', player => {
   player.x = player.x + player.vx, player.y = player.y + player.vy

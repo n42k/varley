@@ -24,6 +24,7 @@ const Game = class Game {
 
   start() {
     this.varley.pub = this.pub
+    this.pub.modules = {}
     this.varley.players = this.players
     this.callbacks['start'].forEach(callback => callback())
   }
@@ -37,7 +38,12 @@ const Game = class Game {
 
     this.players.push(player)
 
-  	let toSend = JSON.stringify({pub: this.oldPub, players: this.oldPlayers})
+  	let toSend = JSON.stringify({
+      pub: this.oldPub,
+      players: this.oldPlayers,
+      t: Date.now()
+    })
+
   	ws.send(JSON.stringify({player: player, all: toSend}))
 
     this.varley.pub = this.pub
@@ -83,6 +89,13 @@ const Game = class Game {
   			this.callbacks['release'].forEach(callback =>
           callback(player, json.release))
   		}
+
+      for(let k in json) {
+        if(this.callbacks[k] === undefined)
+          continue
+
+        this.callbacks[k].forEach(callback => callback(player, json[k]))
+      }
   }
 
   tick() {
@@ -113,7 +126,8 @@ const Game = class Game {
 
   	let toSend = JSON.stringify({
   		pubDiff: pubDiff,
-  		playersDiff: playersDiff
+      playersDiff: playersDiff,
+      t: Date.now()
   	})
 
   	this.players.forEach(player => {

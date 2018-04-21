@@ -77,3 +77,6 @@ _SpriteSheet.prototype.drawAA = function(array, x, y) {
 function Sheet(image, width, height) {
   return new _SpriteSheet(image, width, height)
 }
+
+var _beforeUpdate = []
+var _afterUpdate = []

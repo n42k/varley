@@ -1,4 +1,5 @@
 const varley = require('varley')(this)
+varley.module('chat')
 
 varley.on('start', () => {
   varley.pub.world = [
