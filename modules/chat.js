@@ -16,10 +16,11 @@ module.exports = (varley, args) => {
   })
 
   varley.on('tick', () => {
-    if(varley.pub.modules.chat.messages.length === 0)
+    let messages = varley.pub.modules.chat.messages
+    if(messages.length === 0)
       return
 
-    if(Date.now() - 10000 > varley.pub.modules.chat.messages[0][0])
-      varley.pub.modules.chat.messages.shift()
+    if(Date.now() - 10000 > messages[messages.length - 1][0])
+      messages.pop()
   })
 }
