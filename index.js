@@ -30,9 +30,14 @@ module.exports = self => {
 	vm.runInThisContext.bind(self)(serverCode, serverPath)
 
 	// shared.js
-	const sharedPath = 'shared.js'
-	let sharedCode = fs.readFileSync(sharedPath)
-	vm.runInThisContext.bind(self)(sharedCode, sharedPath)
+	try {
+		const sharedPath = 'shared.js'
+		let sharedCode = fs.readFileSync(sharedPath)
+		vm.runInThisContext.bind(self)(sharedCode, sharedPath)
+	} catch(error) {
+		// we're fine, no shared.js found
+		// let's act as if there was an empty shared.js
+	}
 
 	// eshared.js (Engine Shared)
 	const esharedPath = __dirname + '/static/eshared.js'

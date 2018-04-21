@@ -5,7 +5,12 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "prepare": "require-self"
+    "prepare": "require-self",
+    "update-webdriver": "webdriver-manager update",
+    "start-webdriver": "webdriver-manager --name=webdriver -- start",
+    "run-e2e": "protractor protractor.conf.js",
+    "prepublish": "npm run -s update-webdriver && npm-run-all -p -r start-webdriver run-e2e",
+    "e2e": "npm run -s prepublish"
   },
   "repository": {
     "type": "git",
@@ -26,6 +31,8 @@
     "ws": "^5.1.1"
   },
   "devDependencies": {
+    "npm-run-all": "^4.1.2",
+    "protractor": "^5.3.1",
     "require-self": "^0.2.1"
   }
 }
