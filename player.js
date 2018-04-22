@@ -258,6 +258,10 @@ const Player = class Player {
      this.frame = offset + frame
      this.mov.animationFrame = 0
   }
+
+  playSound(filepath) {
+    this.ws.send(JSON.stringify({sound: filepath}))
+  }
 }
 
 Player.nextId = 0

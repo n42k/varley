@@ -23,9 +23,8 @@ const Game = class Game {
   }
 
   start() {
-    this.varley.pub = this.pub
+    this._initVars()
     this.pub.modules = {}
-    this.varley.players = this.players
     this.callbacks['start'].forEach(callback => callback())
   }
 
@@ -46,8 +45,7 @@ const Game = class Game {
 
   	ws.send(JSON.stringify({player: player, all: toSend}))
 
-    this.varley.pub = this.pub
-    this.varley.players = this.players
+    this._initVars()
     this.callbacks['connect'].forEach(callback => callback(player))
   }
 
@@ -61,58 +59,55 @@ const Game = class Game {
 		let index = this.players.indexOf(player)
 		if(index > -1) {
 			this.players.splice(index, 1)
-      this.varley.pub = this.pub
-      this.varley.players = this.players
+      this._initVars()
 			this.callbacks['disconnect'].forEach(callback => callback(player))
 		}
   }
 
   message(ws, msg) {
-      let player = this._getPlayerFromWS(ws)
+    let player = this._getPlayerFromWS(ws)
 
-      if(player === null)
-        return
+    if(player === null)
+      return
 
-  		let json = JSON.parse(msg)
+		let json = JSON.parse(msg)
 
-      this.varley.pub = this.pub
-      this.varley.players = this.players
+    this._initVars()
 
-  		if(json.press) {
-  			player.keys[json.press] = true
-  			this.callbacks['press'].forEach(callback =>
-          callback(player, json.press))
-  		}
+		if(json.press) {
+			player.keys[json.press] = true
+			this.callbacks['press'].forEach(callback =>
+        callback(player, json.press))
+		}
 
-  		if(json.release) {
-  			player.keys[json.release] = false
-  			this.callbacks['release'].forEach(callback =>
-          callback(player, json.release))
-  		}
+		if(json.release) {
+			player.keys[json.release] = false
+			this.callbacks['release'].forEach(callback =>
+        callback(player, json.release))
+		}
 
-      for(let k in json) {
-        if(this.callbacks[k] === undefined)
-          continue
+    for(let k in json) {
+      if(this.callbacks[k] === undefined)
+        continue
 
-        this.callbacks[k].forEach(callback => callback(player, json[k]))
-      }
+      this.callbacks[k].forEach(callback => callback(player, json[k]))
+    }
   }
 
   tick() {
-      this.varley.pub = this.pub
-      this.varley.players = this.players
-  		this.callbacks['tick'].forEach(callback => callback())
+    this._initVars()
+		this.callbacks['tick'].forEach(callback => callback())
 
-  		this.players.forEach(player => {
-  			if(player.tick)
-  				player.tick()
-  		})
+		this.players.forEach(player => {
+			if(player.tick)
+				player.tick()
+		})
 
-  		this.callbacks['playertick'].forEach(callback => {
-  			this.players.forEach(player => callback(player))
-  		})
+		this.callbacks['playertick'].forEach(callback => {
+			this.players.forEach(player => callback(player))
+		})
 
-  		this._update()
+		this._update()
   }
 
   _update() {
@@ -138,6 +133,16 @@ const Game = class Game {
 
   	this.oldPub = newPub
   	this.oldPlayers = newPlayers
+  }
+
+  _playSound(filepath) {
+    this.players.forEach(player => player.playSound(filepath))
+  }
+
+  _initVars() {
+    this.varley.pub = this.pub
+    this.varley.players = this.players
+    this.varley.playSound = this._playSound
   }
 
   _getPlayerFromWS(ws) {

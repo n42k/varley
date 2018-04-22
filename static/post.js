@@ -61,6 +61,11 @@ function _onmessage(json) {
       _update()
     }
   }
+
+  if(json.sound) {
+    let audio = new Audio(json.sound)
+    audio.play()
+  }
 }
 
 function _begin() {

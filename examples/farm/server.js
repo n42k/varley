@@ -47,8 +47,12 @@ varley.on('press', (player, key) => {
   let tileY = Math.round(player.y/32)
 
   if(tileY < 0 || tileY >= varley.pub.world.length ||
-     tileX < 0 || tileX >= varley.pub.world[tileY].length)
+     tileX < 0 || tileX >= varley.pub.world[tileY].length ||
+     varley.pub.world[tileY][tileX] !== 6)
      return
+
+  // https://opengameart.org/content/jump-landing-sound
+  varley.playSound('farm.wav')
 
   varley.pub.world[tileY][tileX] = 15
 })
