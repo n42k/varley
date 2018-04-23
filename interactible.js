@@ -100,17 +100,12 @@ const Interactible = class Interactible {
       gravity = 1
 
     this.bind(interactible => {
-      if((this.keys.LEFT && this.keys.RIGHT) || (!this.keys.LEFT && !this.keys.RIGHT)) {
-        let dif = Math.abs(this.mov.ax) / this.mov.ax
-        if(dif > 0) {
-          this.vx -= dif
-          if(this.vx < 0)
-            this.vx = 0
-        } else if(dif < 0) {
-          this.vx += dif
-          if(this.vx > 0)
-            this.vx = 0
-        }
+      if(this.keys.LEFT === this.keys.RIGHT) {
+        let dif = this.mov.ax * Math.abs(this.vx) / this.vx
+        if(dif > 0)
+          this.vx = Math.max(0, this.vx - this.mov.ax)
+        else if(dif < 0)
+          this.vx = Math.min(0, this.vx + this.mov.ax)
       } else if(this.keys.LEFT)
         this.vx -= this.mov.ax
       else if(this.keys.RIGHT)
