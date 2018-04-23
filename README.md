@@ -1,6 +1,7 @@
 # Varley
 
 [![npm version](https://badge.fury.io/js/varley.svg)](https://badge.fury.io/js/varley)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 A multiplayer game engine with rapid prototyping as its sole focus.
 Intended to be used for game jams with limited time, such as the 1 hour game jam.
@@ -102,6 +103,3 @@ const WORLD_WIDTH = 50, WORLD_HEIGHT = 35
 The best way to contribute at this point is to try out the engine, and e-mail (n101010k@gmail.com) me your thoughts on it, or create an [issue](https://github.com/n42k/varley/issues/new) if you find a problem with it. Pull requests are also welcome, if you fix the problem you've found.
 
 If you have a feature request, feel free to open an issue, so that we can discuss it.
-
-## License
-MIT
