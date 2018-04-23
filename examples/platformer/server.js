@@ -28,15 +28,15 @@ varley.on('start', () => {
 })
 
 varley.on('connect', player => {
-  player.PlatformerPlayer(farmer, {
-    x: 384, y: 384, vx: 8, vy: 18, ax: 2, ay: 18,
-    frameTime: 2, animations: [3, 2, 3, 2],
-    world: varley.pub.world, tileSheet: farm,
-    blocks: [
+  player
+    .Interactible(farmer, 384, 384)
+    .Movement(8, 18, 2, 18)
+    .Collision(varley.pub.world, farm, [
       S, S, S, A, S, A, A, A, A,
       S, S, S, A, S, A, A, A, A
-    ]
-  })
+    ])
+    .Platformer()
+    .Animations(2, [3, 2, 3, 2])
 })
 
 varley.on('press', (player, key) => {
