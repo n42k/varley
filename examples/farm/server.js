@@ -27,22 +27,7 @@ varley.on('start', () => {
   ]
 })
 
-varley.on('connect', player => {
-  player
-    .Interactible(farmer, 384, 384)
-    .Movement()
-    .Collision(varley.pub.world, farm, [
-      S, S, S, A, S, A, A, A, A,
-      S, S, S, A, S, A, A, A, A
-    ])
-    .TopDown()
-    .Animations(2, [2, 1, 3, 0])
-})
-
-varley.on('press', (player, key) => {
-  if(key !== 'SPACE')
-    return
-
+function till(varley, player) {
   let tileX = Math.round(player.x/32)
   let tileY = Math.round(player.y/32)
 
@@ -55,6 +40,28 @@ varley.on('press', (player, key) => {
   varley.playSound('farm.wav')
 
   varley.pub.world[tileY][tileX] = 15
+}
+
+varley.on('connect', player => {
+  player
+    .Interactible(farmer, 384, 384)
+    .Movement()
+    .Collision(varley.pub.world, farm, [
+      S, S, S, A, S, A, A, A, A,
+      S, S, S, A, S, A, A, A, A
+    ])
+    .TopDown()
+    .Animations(2, [2, 1, 3, 0])
+    .Touchable(varley.players)
+
+  player.on('touch', (player, other) => till(varley, player))
+})
+
+varley.on('press', (player, key) => {
+  if(key !== 'SPACE')
+    return
+
+  till(varley, player)
 })
 
 varley.run({tickRate: 16})

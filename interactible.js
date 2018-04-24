@@ -12,7 +12,11 @@ const Interactible = class Interactible {
 
   Interactible(spritesheet, x, y) {
     this.mov = {}
-    this.mov.bindings = []
+    this.mov.callbacks = {
+      tick: [],
+      touch: []
+    }
+
     this.mov.sheet = spritesheet
 
     this.x = x
@@ -68,7 +72,7 @@ const Interactible = class Interactible {
   TopDown() {
     this._movNullCheck()
 
-    this.bind(interactible => {
+    this.on('tick', interactible => {
       this.vx = 0
       if(this.keys.LEFT) this.vx -= this.mov.ax
       if(this.keys.RIGHT) this.vx += this.mov.ax
@@ -99,7 +103,7 @@ const Interactible = class Interactible {
     if(gravity === undefined)
       gravity = 1
 
-    this.bind(interactible => {
+    this.on('tick', interactible => {
       if(this.keys.LEFT === this.keys.RIGHT) {
         let dif = this.mov.ax * Math.abs(this.vx) / this.vx
         if(dif > 0)
@@ -146,11 +150,20 @@ const Interactible = class Interactible {
     return this
   }
 
+  Touchable(list) {
+    if(this.mov.touchables === undefined)
+      this.mov.touchables = []
+
+    this.mov.touchables.push(list)
+
+    return this
+  }
+
   tick() {
     if(this.mov === null)
       return
 
-    this.mov.bindings.forEach(binding => binding(this))
+    this.mov.callbacks['tick'].forEach(callback => callback(this))
 
     this.vx = Math.max(-this.mov.vx, Math.min(this.mov.vx, this.vx))
     this.vy = Math.max(-this.mov.vy, Math.min(this.mov.vy, this.vy))
@@ -193,6 +206,21 @@ const Interactible = class Interactible {
       this.evy = this.vy - vy
     }
 
+    if(this.mov.touchables !== undefined && this.mov.sheet !== undefined) {
+      this.mov.touchables.forEach(list => list.forEach(other => {
+        if(this === other)
+          return
+
+        if(other.mov.sheet !== undefined &&
+           this.x  <= other.x + other.mov.sheet.width &&
+           other.x <= this.x  + this.mov.sheet.width &&
+           this.y  <= other.y + other.mov.sheet.height &&
+           other.y <= this.y  + this.mov.sheet.height)
+            this.mov.callbacks['touch'].forEach(callback =>
+              callback(this, other))
+      }))
+    }
+
     if(this.mov.playing === undefined ||
        this.mov.animation === undefined ||
        ++this.mov.animationFrame < this.mov.frameTime ||
@@ -230,8 +258,11 @@ const Interactible = class Interactible {
     return false
   }
 
-  bind(callback) {
-    this.mov.bindings.push(callback)
+  on(action, callback) {
+    if(this.mov.callbacks[action] === undefined)
+      throw new Error('Invalid on: interactible.on(\'' + action + '\', { ... })')
+
+    this.mov.callbacks[action].push(callback)
   }
 
   playAnimation(id) {
